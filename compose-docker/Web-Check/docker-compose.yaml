@@ -1,0 +1,19 @@
+services:
+  web-check:
+    container_name: Web-Check
+    image: lissy93/web-check
+#    ports:
+#      - 127.0.0.1:3001:3000
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web-check.rule=Host(`web-check.<HOST>.example.org`) || Host(`web-check.<HOST>.example.org`)"
+      - "traefik.http.routers.web-check.entrypoints=websecure"
+      - "traefik.http.routers.web-check.tls=true"
+      - "traefik.http.services.web-check.loadbalancer.server.port=3000"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

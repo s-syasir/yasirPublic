@@ -1,0 +1,113 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    user: 1000:1000
+    group_add:
+      - '110'  # This needs to be the group id of running `stat -c '%g' /dev/dri/renderD128` on the docker host
+    environment:
+      - TZ=America/Los_Angeles
+    volumes:
+      - <VOLUME>
+      - <VOLUME>
+      # Adding Cold_Store folders
+      - "<NAS_MOUNT>:/Cold_Store/big_store/Movies:rw"
+      - "<NAS_MOUNT> Shows:/Cold_Store/big_store/TV Shows:rw"
+      - "<NAS_MOUNT>:/Cold_Store/big_store/Anime:rw"
+      # Adding Common folders
+      - "<NAS_MOUNT>:/Common/Windows/Music:rw"
+      # Adding arrStore folders
+      - "<NAS_MOUNT>:/arr-share:rw"
+#      - "<NAS_MOUNT>:/arr-share/Movies:ro"
+#      - "<NAS_MOUNT> Shows:/arr-share/TV Shows:ro"
+#      - "<NAS_MOUNT>:/arr-share/Anime:ro"
+#      - "<NAS_MOUNT>:/arr-share/Anime:ro"
+#      - "<NAS_MOUNT>:/arr-share/Music:ro"
+    ports:
+      - "0.0.0.0:8096:8096"
+      - "127.0.0.1:8920:8920" #optional
+      - "127.0.0.1:7359:7359/udp" #optional
+      - "127.0.0.1:1900:1900/udp" #optional
+    devices:
+      # uncomment these and amend if you require GPU accelerated transcoding
+      - /dev/dri/renderD128:/dev/dri/renderD128
+      - /dev/dri/card0:/dev/dri/card0
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyfin.rule=Host(`jellyfin.<HOST>.example.org`) || Host(`jellyfin.<HOST>.example.org`)"
+      - "traefik.http.routers.jellyfin.entrypoints=websecure"
+      - "traefik.http.routers.jellyfin.tls=true"
+      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+    networks:
+      jellyfin:
+      proxy:
+    security_opt:
+      - no-new-privileges:true
+
+  jellyseerr:
+    container_name: jellyseerr
+    image: fallenbagel/jellyseerr:latest
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Los_Angeles
+    volumes:
+      - <VOLUME>
+    ports:
+      - "0.0.0.0:5055:5055"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyseerr.rule=Host(`jellyseerr.<HOST>.example.org`) || Host(`jellyseerr.<HOST>.example.org`)"
+      - "traefik.http.routers.jellyseerr.entrypoints=websecure"
+      - "traefik.http.routers.jellyseerr.tls=true"
+      - "traefik.http.services.jellyseerr.loadbalancer.server.port=5055"
+    networks:
+      jellyfin:
+      proxy:
+    restart: unless-stopped
+
+  # NOTE: This shit crashes for some reason. Just comment out the pain. Why tf do I care about watch stats anyway...
+  jellystat-db:
+    image: postgres:15.2
+    container_name: jellystat-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: yasir
+      POSTGRES_PASSWORD: <REDACTED>
+    volumes:
+      - <VOLUME>
+    networks:
+      jellyfin:
+
+  jellystat:
+    image: cyfershepard/jellystat:latest
+    container_name: jellystat
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: yasir
+      POSTGRES_PASSWORD: <REDACTED>
+      POSTGRES_IP: jellystat-db
+      POSTGRES_PORT: 5432
+      JWT_SECRET: <REDACTED>
+      TZ: America/Los_Angeles
+    volumes:
+      - <VOLUME>
+    ports:
+      - "0.0.0.0:3000:3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellystat.rule=Host(`jellystat.<HOST>.example.org`) || Host(`jellystat.<HOST>.example.org`)"
+      - "traefik.http.routers.jellystat.entrypoints=websecure"
+      - "traefik.http.routers.jellystat.tls=true"
+      - "traefik.http.services.jellystat.loadbalancer.server.port=3000"
+    networks:
+      jellyfin:
+      proxy:
+    depends_on:
+      - jellystat-db
+
+networks:
+  jellyfin:
+  proxy:
+    external: true

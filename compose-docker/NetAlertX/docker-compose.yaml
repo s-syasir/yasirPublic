@@ -1,0 +1,78 @@
+services:
+  netalertx:
+  #use an environmental variable to set host networking mode if needed
+    container_name: netalertx                       # The name when you docker contiainer ls
+    image: ghcr.io/netalertx/netalertx:latest
+    network_mode: ${NETALERTX_NETWORK_MODE:-host}   # Use host networking for ARP scanning and other services
+
+    read_only: true                                 # Make the container filesystem read-only
+    cap_drop:                                       # Drop all capabilities for enhanced security
+      - ALL
+    cap_add:                                        # Add only the necessary capabilities
+      - NET_ADMIN                                   # Required for ARP scanning
+      - NET_RAW                                     # Required for raw socket operations
+      - NET_BIND_SERVICE                            # Required to bind to privileged ports (nbtscan)
+      - CHOWN                                       # Required for root-entrypoint to chown /data + /tmp before dropping privileges
+      - SETUID                                      # Required for root-entrypoint to switch to non-root user
+      - SETGID                                      # Required for root-entrypoint to switch to non-root group
+
+    volumes:
+      - <VOLUME>
+
+    # Example custom local folder called <PATH>
+    # - type: bind
+    #   source: <PATH>
+    #   target: /data
+    #   read_only: false
+    # ... or use the alternative format
+    # - <VOLUME>
+
+      - type: bind                                  # Bind mount for timezone consistency
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+      # Mount your DHCP server file into NetAlertX for a plugin to access
+      # - path/on/host/to/dhcp.file:/resources/dhcp.file
+
+    # tmpfs mount consolidates writable state for a read-only container and improves performance
+    # uid/gid default to the service user (NETALERTX_UID/GID, default 20211)
+    # mode=1700 grants rwx------ permissions to the runtime user only
+    tmpfs:
+      # Comment out to retain logs between container restarts - this has a server performance impact.
+      - <VOLUME>
+
+      # Retain logs - comment out tmpfs /tmp if you want to retain logs between container restarts
+      # Please note if you remove the /tmp mount, you must create and maintain sub-folder mounts.
+      # - <VOLUME>
+      # - <VOLUME>
+      # - <VOLUME>
+      # - <VOLUME>
+
+    environment:
+      LISTEN_ADDR: ${LISTEN_ADDR:-0.0.0.0}                   # Listen for connections on all interfaces
+      PORT: ${PORT:-20211}                                   # Application port
+      GRAPHQL_PORT: ${GRAPHQL_PORT:-20212}                   # GraphQL API port (passed into APP_CONF_OVERRIDE at runtime)
+  #    NETALERTX_DEBUG: ${NETALERTX_DEBUG:-0}                 # 0=kill all services and restart if any dies. 1 keeps running dead services.
+  #    PUID: 20211                             # Runtime PUID override, set to 0 to run as root
+  #    PGID: 20211                             # Runtime PGID override
+
+    # Resource limits to prevent resource exhaustion
+    mem_limit: 2048m            # Maximum memory usage
+    mem_reservation: 1024m      # Soft memory limit
+    cpu_shares: 512             # Relative CPU weight for CPU contention scenarios
+    pids_limit: 512             # Limit the number of processes/threads to prevent fork bombs
+    logging:
+      options:
+        max-size: "10m"         # Rotate log files after they reach 10MB
+        max-file: "3"           # Keep a maximum of 3 log files
+
+    # Always restart the container unless explicitly stopped
+    restart: unless-stopped
+    # Traefik labels commented out — container uses network_mode: host, routed via dynamic.yml (<LAN_IP>:20211)
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.routers.netalertX.rule=Host(`netalertX.<HOST>.example.org`) || Host(`netalertX.<HOST>.example.org`)"
+#      - "traefik.http.routers.netalertX.entrypoints=websecure"
+#      - "traefik.http.routers.netalertX.tls=true"
+#      - "traefik.http.services.netalertX.loadbalancer.server.port=20211"

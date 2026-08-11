@@ -1,0 +1,22 @@
+services:
+  protonmail-bridge:
+    image: shenxn/protonmail-bridge:latest
+    container_name: protonmail-bridge
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    entrypoint: >
+      /bin/sh -c "apt-get update -qq &&
+      apt-get install -y -qq libfido2-1 &&
+      bash /protonmail/entrypoint.sh"
+    ports:
+      - "0.0.0.0:1025:25/tcp"
+      - "0.0.0.0:1143:143/tcp"
+    volumes:
+      - <VOLUME>
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

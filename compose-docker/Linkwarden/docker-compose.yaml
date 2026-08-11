@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - <VOLUME>
+    networks:
+      - linkwarden
+  
+  linkwarden:
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
+    restart: unless-stopped
+    # build: . # uncomment this line to build from source
+    image: ghcr.io/linkwarden/linkwarden:latest # comment this line to build from source
+#    ports:
+#     - 127.0.0.1:3069:3000
+    volumes:
+      - <VOLUME>
+    depends_on:
+      - postgres
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.linkwarden.rule=Host(`linkwarden.<HOST>.example.org`) || Host(`linkwarden.<HOST>.example.org`)"
+      - "traefik.http.routers.linkwarden.entrypoints=websecure"
+      - "traefik.http.routers.linkwarden.tls=true"
+      - "traefik.http.services.linkwarden.loadbalancer.server.port=3000"
+    networks:
+      - linkwarden
+      - proxy
+
+networks:
+  linkwarden:
+  proxy:
+    external: true

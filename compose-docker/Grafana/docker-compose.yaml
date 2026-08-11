@@ -1,0 +1,30 @@
+services:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+#    ports:
+#      - "3100:3000"
+    volumes:
+      - <VOLUME>
+    environment:
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=<LAN_IP>:1025
+      - GF_SMTP_USER=<EMAIL>
+      - GF_SMTP_PASSWORD=<REDACTED>
+      - GF_SMTP_FROM_ADDRESS=<EMAIL>
+      - GF_SMTP_FROM_NAME=Yasir
+      - GF_SMTP_SKIP_VERIFY=true
+      - GF_SERVER_ROOT_URL=https://grafana.<HOST>.example.org
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.<HOST>.example.org`) || Host(`grafana.<HOST>.example.org`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

@@ -1,0 +1,48 @@
+services:
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+#    network_mode: "host"
+    ports:
+      - "80:80"
+      - "443:443"
+#      - "81:81"
+    volumes:
+      - <VOLUME>
+      - <VOLUME>
+      - <VOLUME>
+    restart: unless-stopped
+    networks:
+      - proxy
+    extra_hosts:
+      - "host-gateway:host-gateway"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx-proxy-manager.rule=Host(`nginx-proxy-manager.<HOST>.example.org`) || Host(`nginx-proxy-manager.<HOST>.example.org`)"
+      - "traefik.http.routers.nginx-proxy-manager.entrypoints=websecure"
+      - "traefik.http.routers.nginx-proxy-manager.tls=true"
+      - "traefik.http.services.nginx-proxy-manager.loadbalancer.server.port=81"
+
+  goaccess:
+    image: justsky/goaccess-for-nginxproxymanager:latest
+    container_name: goaccess
+    restart: unless-stopped
+    environment:
+      - TZ=America/Los_Angeles
+#    ports:
+#      - '127.0.0.1:7880:7880'
+    volumes:
+      - <VOLUME>
+#      - ./data/npm_data/logs/proxy-host-1_access.log:/opt/log/proxy-host-1_access.log
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx-proxy-manager-logs.rule=Host(`nginx-proxy-manager-logs.<HOST>.example.org`) || Host(`nginx-proxy-manager-logs.<HOST>.example.org`)"
+      - "traefik.http.routers.nginx-proxy-manager-logs.entrypoints=websecure"
+      - "traefik.http.routers.nginx-proxy-manager-logs.tls=true"
+      - "traefik.http.services.nginx-proxy-manager-logs.loadbalancer.server.port=7880"
+
+networks:
+  proxy:
+    external: true

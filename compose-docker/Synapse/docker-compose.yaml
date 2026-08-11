@@ -1,0 +1,71 @@
+services:
+  synapse:
+    container_name: synapse
+    image: docker.io/matrixdotorg/synapse:latest
+    # Since synapse does not retry to connect to the database, restart upon
+    # failure
+    restart: unless-stopped
+    # See the readme for a full documentation of the environment settings
+    environment:
+    # config file location - be sure to create one first!
+    # https://github.com/matrix-org/synapse/tree/develop/docker#generating-a-configuration-file
+      - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
+      - SYNAPSE_SERVER_NAME=matrix.<HOST>.example.org
+      - SYNAPSE_REPORT_STATS=yes
+      - UID=1000
+      - GID=1000
+    volumes:
+      # You may either store all the files in a local folder
+      - <VOLUME>
+      # .. or you may split this between different storage points
+      # - ./files:/data
+      # - <VOLUME>
+      # - <VOLUME>
+    depends_on:
+    # We're going to use an external database as it's more performant for multiple
+    # users
+      - synapse-db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.synapse.rule=Host(`matrix.<HOST>.example.org`) || Host(`matrix.<HOST>.example.org`)"
+      - "traefik.http.routers.synapse.entrypoints=websecure"
+      - "traefik.http.routers.synapse.tls=true"
+      - "traefik.http.services.synapse.loadbalancer.server.port=8008"
+    networks:
+      matrix:
+      proxy:
+    # Uncomment if not using a proxy. In order to expose Synapse, remove one of the following, 
+    # you might for instance expose the TLS port directly:
+#    ports:
+#      - 127.0.0.1:8448:8448/tcp
+#      - 127.0.0.1:8008:8008/tcp
+
+    # ... or use a reverse proxy, here is an example for traefik:
+
+  synapse-db:
+    image: docker.io/postgres:15-alpine
+    container_name: synapse-db
+    restart: unless-stopped
+    # Change password below, of course!
+    environment:
+      - POSTGRES_USER=synapse_user
+      - POSTGRES_PASSWORD=<REDACTED>
+      - POSTGRES_DB=synapse
+      # ensure the database gets created correctly
+      # https://github.com/matrix-org/synapse/blob/master/docs/postgres.md#set-up-database
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      # You may store the database tables in a local folder..
+      - <VOLUME>
+      # .. or store them on some high performance storage for better results
+      # - <VOLUME>
+#    ports:
+#      - 127.0.0.1:5435:5432
+    networks:
+      matrix:
+
+networks:
+  matrix:
+    external: true
+  proxy:
+    external: true

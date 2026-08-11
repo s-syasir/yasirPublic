@@ -1,0 +1,5 @@
+[user]
+	name = yasir
+	email = <EMAIL>
+[pull]
+	rebase = true

@@ -1,0 +1,40 @@
+services:
+  db_recipes:
+    restart: unless-stopped
+    image: postgres:16-alpine
+#    ports:
+#      - "127.0.0.1:5433:5432"
+    volumes:
+      - <VOLUME>
+    env_file:
+      - <PATH>
+    networks:
+      - tandoor
+
+  web_recipes:
+    restart: unless-stopped
+    image: vabene1111/recipes:latest
+#    ports:
+#      - "127.0.0.1:8083:80"
+    env_file:
+      - <PATH>
+    volumes:
+      - <VOLUME>
+      - <VOLUME>
+    depends_on:
+      - db_recipes
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tandoor.rule=Host(`tandoor.<HOST>.example.org`) || Host(`tandoor.<HOST>.example.org`)"
+      - "traefik.http.routers.tandoor.entrypoints=websecure"
+      - "traefik.http.routers.tandoor.tls=true"
+      - "traefik.http.services.tandoor.loadbalancer.server.port=80"
+    networks:
+      - tandoor
+      - proxy
+
+networks:
+  tandoor:
+    external: true
+  proxy:
+    external: true

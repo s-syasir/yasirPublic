@@ -1,0 +1,233 @@
+{
+    // General settings for ALL filetypes
+    // Basics: fontsize, wordwrap, minimap, theme, format on save, etc.
+    "editor.fontSize": 14,
+    "editor.fontFamily": "Fira Code, Consolas, monospace",
+    "editor.lineHeight": 22,
+    "editor.tabSize": 4,
+    "editor.wordWrap": "on",
+    "editor.minimap.enabled": true,
+    "workbench.colorTheme": "Default Dark Modern",
+    "terminal.integrated.fontSize": 14,
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 100,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+    // Visual settings for ALL filetypes
+    "editor.cursorBlinking": "smooth",
+    "editor.cursorSmoothCaretAnimation": "on",
+    "editor.linkedEditing": true,
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    "workbench.editor.editorActionsLocation": "titleBar",
+    "workbench.iconTheme": "material-icon-theme",
+    "zenmode.centerLayout": true,
+
+    // Enhancing File Management for ALL filetypes
+    "explorer.enableUndo": true,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.exclude": {
+        "**/.git": true
+    },
+
+    // Excluding extra things from search
+    "search.exclude": {
+        "**/node_modules": true
+    },
+
+    // Terminal customization
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "terminal.integrated.fontFamily": "MesloLGS NF",
+
+    // Auto-formatting and Linting
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit",
+        "source.organizeImports": "explicit"
+    },
+    "prettier.singleQuote": false,
+    "prettier.trailingComma": "all",
+    "prettier.tabWidth": 4,
+    "eslint.enable": true,
+    "eslint.lintTask.enable": true,
+
+    // Git QOL improvements
+    "git.enableSmartCommit": true,
+    "git.confirmSync": true,
+    "git.autofetch": true,
+    "diffEditor.ignoreTrimWhitespace": false,
+    "git.openRepositoryInParentFolders": "never",
+
+    // Disabling telemetry
+    "telemetry.telemetryLevel": "off",
+    "telemetry.editStats.enabled": false,
+    "telemetry.feedback.enabled": false,
+    "gitlens.telemetry.enabled": false,
+    "continue.telemetryEnabled": false,
+    "intelephense.telemetry.enabled": false,
+    "vscode-mysql.enableTelemetry": false,
+    "dotnetAcquisitionExtension.enableTelemetry": false,
+    "code-runner.enableAppInsights": false,
+    "redhat.telemetry.enabled": false,
+
+    // Redundant telemetry disabling. Kept because whynot.
+    "telemetry.enableTelemetry": false,
+    "telemetry.enableCrashReporter": false,
+
+    // Continue enabling autocomplete
+    "continue.enableTabAutocomplete": true,
+
+    /*
+    Language-specific settings
+    */
+
+    // python
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+
+    "isort.args": ["--profile", "black"],
+
+    // C#
+    "[csharp]": {
+        "editor.defaultFormatter": "ms-dotnettools.csharp"
+    },
+    // C
+    "[c]": {
+        "editor.semanticHighlighting.enabled": true
+    },
+    // C++
+    "[cpp]": {
+        "editor.semanticHighlighting.enabled": true
+    },
+    // JS
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    // TS
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    // CSS
+    "[css]": {},
+
+    // CSV
+    "[csv]": {},
+
+    // Dart
+    "[dart]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.detectIndentation": false,
+        "editor.suggest.insertMode": "replace",
+        "editor.defaultFormatter": "Dart-Code.dart-code",
+        "editor.inlayHints.enabled": "offUnlessPressed"
+    },
+
+    // Docker Compose
+    "[dockercompose]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.autoIndent": "advanced",
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": false,
+            "strings": true
+        }
+    },
+
+    // Docker File
+    "[dockerfile]": {
+        "editor.quickSuggestions": {
+            "strings": true
+        }
+    },
+
+    // Go
+    "[go]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+
+    // Gradle
+    "[gradle]": {},
+
+    // Ansible
+    "[ansible]": {
+        "editor.detectIndentation": true,
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.quickSuggestions": {
+            "comments": true,
+            "other": true,
+            "strings": true
+        },
+        "editor.autoIndent": "advanced"
+    },
+
+    // Bat files
+    "[bat]": {},
+
+    // jsons with comments
+    "[jsonc]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+
+    // XML
+    "[xml]": {},
+
+    // yaml
+    "[yaml]": {},
+
+    // bash scripts
+    "[shellscript]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format",
+        "files.eol": "\n",
+        "editor.defaultColorDecorators": "never"
+    },
+
+    /*
+      Windows-specific settings
+    */
+
+    // Disabling windows background updates
+    "update.enableWindowsBackgroundUpdates": false,
+    "update.mode": "none",
+
+    // Terminal profiles
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell"
+        },
+        "Command Prompt": {
+            "path": [
+                "${env:windir}\\Sysnative\\cmd.exe",
+                "${env:windir}\\System32\\cmd.exe"
+            ],
+            "args": [],
+            "icon": "terminal-cmd"
+        },
+        "Git Bash": {
+            "source": "Git Bash"
+        },
+        "Ubuntu (WSL)": {
+            "path": "C:\\Windows\\System32\\wsl.exe",
+            "args": ["-d", "Ubuntu"]
+        }
+    },
+
+    // Default terminal profile being used
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+
+    "yaml.schemas": {
+        "file:///c%3A/Users/<USER>/.vscode/extensions/continue.continue-1.2.1-win32-x64/config-yaml-schema.json": [
+            ".continue/**/*.yaml"
+        ]
+    }
+}

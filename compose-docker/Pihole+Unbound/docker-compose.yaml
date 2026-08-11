@@ -1,0 +1,62 @@
+services:
+  pihole:
+    container_name: pihole
+    hostname: pihole
+    image: pihole/pihole:latest
+    networks:
+      dns_net:
+        ipv4_address: <LAN_IP>
+      proxy:
+    ports:
+      - "0.0.0.0:53:53/tcp"
+      - "0.0.0.0:53:53/udp"
+#      - "127.0.0.1:85:80/tcp"
+#      - "443:443/tcp" Commenting out because nginx proxy manager needs to use the main ports.
+    environment:
+      TZ: 'America/Los_Angeles'
+      FTLCONF_webserver_api_password: ${ADMIN_PASSWORD}
+      FTLCONF_dns_listeningMode: 'all'
+      FTLCONF_dns_upstreams: '<LAN_IP>#53'
+      FTLCONF_webserver_port: '80o,443os'
+        
+      # Optionals. These are set for debugging purposes:
+      FTLCONF_debug_api: 'true'
+      TAIL_FTL_LOG: 1
+      PH_VERBOSE: 1
+
+    volumes:
+      - <VOLUME>
+      - <VOLUME>
+      - '<PATH>:/etc/hosts'  # Mounting the hosts file
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pihole.rule=Host(`pihole.<HOST>.example.org`) || Host(`pihole.<HOST>.example.org`)"
+      - "traefik.http.routers.pihole.entrypoints=websecure"
+      - "traefik.http.routers.pihole.tls=true"
+      - "traefik.http.services.pihole.loadbalancer.server.port=80"
+    restart: unless-stopped
+  unbound:
+    container_name: unbound
+    image: mvance/unbound:latest # remember to change this if you're using rpi
+    networks:
+      dns_net:
+        ipv4_address: <LAN_IP>
+    volumes:
+      - <VOLUME>
+      - '<PATH>:/etc/hosts'  # Mounting the hosts file
+#    ports:
+#      - "127.0.0.1:5053:53/tcp"
+#      - "127.0.0.1:5053:53/udp"
+    healthcheck:
+      test: ["NONE"]
+    restart: unless-stopped
+
+networks:
+  dns_net:
+    driver: bridge
+    ipam:
+        config:
+        - subnet: <LAN_IP>/16
+  proxy:
+    external: true
+

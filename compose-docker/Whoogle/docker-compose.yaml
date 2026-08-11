@@ -1,0 +1,33 @@
+services:
+  whoogle-search:
+    image: benbusby/whoogle-search
+    container_name: whoogle-search
+    restart: unless-stopped
+    pids_limit: 50
+    mem_limit: 256mb
+    memswap_limit: 256mb
+    user: whoogle
+    security_opt:
+      - no-new-privileges
+    cap_drop:
+      - ALL
+    tmpfs:
+      - <VOLUME>
+      - <VOLUME>
+      - <VOLUME>
+    env_file:
+      - whoogle.env
+    # ports:
+    #   - "5000:5000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoogle.rule=Host(`whoogle.<HOST>.example.org`) || Host(`whoogle.<HOST>.example.org`)"
+      - "traefik.http.routers.whoogle.entrypoints=websecure"
+      - "traefik.http.routers.whoogle.tls=true"
+      - "traefik.http.services.whoogle.loadbalancer.server.port=5000"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

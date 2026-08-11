@@ -1,0 +1,53 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    pull_policy: always
+    tty: true
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      # Arc A380 has only ~4.9 GiB usable VRAM. Left unset, a model's full advertised
+      # window (qwen3.5 = 256K) silently pushes layers onto CPU mid-conversation and
+      # just feels 'randomly slow'. Hard ceiling here applies to every client.
+      - OLLAMA_CONTEXT_LENGTH=8192
+    devices:
+      - /dev/dri:/dev/dri
+    group_add:
+      - video
+      - 110
+        # 110 = render after running sudo stat '%g' /dev/dri/renderD128
+    volumes:
+      - <VOLUME>
+    ports:
+      - "<LAN_IP>:11434:11434"
+    networks:
+      - ollama
+      - proxy
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - <VOLUME>
+    depends_on:
+      - ollama
+    ports:
+      - "<LAN_IP>:3000:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ollama.rule=Host(`ollama.<HOST>.example.org`) || Host(`ollama.<HOST>.example.org`)"
+      - "traefik.http.routers.ollama.entrypoints=websecure"
+      - "traefik.http.routers.ollama.tls=true"
+      - "traefik.http.services.ollama.loadbalancer.server.port=8080"
+    networks:
+      - ollama
+      - proxy
+
+networks:
+  ollama:
+  proxy:
+    external: true

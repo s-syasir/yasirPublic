@@ -1,0 +1,32 @@
+services:
+  vert:
+    container_name: vert
+    image: ghcr.io/vert-sh/vert:latest
+    build:
+      context: .
+      args:
+        PUB_HOSTNAME: ${PUB_HOSTNAME:-localhost:5173}
+        PUB_PLAUSIBLE_URL: ${PUB_PLAUSIBLE_URL:-}
+        PUB_ENV: ${PUB_ENV:-production}
+        PUB_DISABLE_ALL_EXTERNAL_REQUESTS: ${PUB_DISABLE_ALL_EXTERNAL_REQUESTS:-false}
+        PUB_VERTD_URL: ${PUB_VERTD_URL:-}
+        PUB_DONATION_URL: ${PUB_DONATION_URL:-https://donations.vert.sh}
+        PUB_STRIPE_KEY: ${PUB_STRIPE_KEY:-<REDACTED>}
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vert.rule=Host(`vert.<HOST>.example.org`) || Host(`vert.<HOST>.example.org`)"
+      - "traefik.http.routers.vert.entrypoints=websecure"
+      - "traefik.http.routers.vert.tls=true"
+      - "traefik.http.services.vert.loadbalancer.server.port=80"
+#    volumes:
+#     NOT NECESSARY, it's a converter app. Wtf do I need disk space to be used for...
+#    ports:
+#      - ${PORT:-3000}:80
+#      - "127.0.0.1:8081:80"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

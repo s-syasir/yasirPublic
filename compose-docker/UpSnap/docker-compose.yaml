@@ -1,0 +1,23 @@
+services:
+  upsnap:
+    container_name: upsnap
+    image: ghcr.io/seriousm4x/upsnap:5
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - <VOLUME>
+    environment:
+      - TZ=America/Los_Angeles
+      # - UPSNAP_HTTP_LISTEN=127.0.0.1:8090
+      # - UPSNAP_INTERVAL=*/10 * * * * *
+      # - UPSNAP_SCAN_RANGE=<LAN_IP>/24
+      # - UPSNAP_SCAN_TIMEOUT=500ms
+      # - UPSNAP_PING_PRIVILEGED=true
+      # - UPSNAP_WEBSITE_TITLE=UpSnap
+    # Traefik labels commented out — container uses network_mode: host, routed via dynamic.yml (<LAN_IP>:8090)
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.routers.upsnap.rule=Host(`upsnap.<HOST>.example.org`) || Host(`upsnap.<HOST>.example.org`)"
+#      - "traefik.http.routers.upsnap.entrypoints=websecure"
+#      - "traefik.http.routers.upsnap.tls=true"
+#      - "traefik.http.services.upsnap.loadbalancer.server.port=8090"

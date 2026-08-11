@@ -1,0 +1,31 @@
+For actual lirc config and code:
+  https://linuxhandbook.com/bash-sleep/
+  
+  Follow this guide here:
+	https://zaman.is-a.dev/posts/how-to-use-raspberry-pi-as-infrared-ir-remote/#software
+	
+	Set the lirc_options.conf file to have:
+		driver          = default
+		device          = /dev/lirc0
+	THEN, edit the /boot/config.txt to assign the pins as you have set them up.
+	I setup my pins to be:
+		# Overlaying infrared into GPIO pins
+		#dtoverlay=gpio-ir,gpio_pin=19 # for receiving data
+		dtoverlay=gpio-ir-tx,gpio_pin=26 # for sending commands
+		
+	NOTE: you can only have one of the ir pins set. The Pi can only transmit OR receive.
+	NOT BOTH.
+		sources:
+			https://www.instructables.com/Setup-IR-Remote-Control-Using-LIRC-for-the-Raspber/
+			https://lirc.org/html/configuration-guide.html
+			https://superuser.com/questions/1441396/rpi-3b-lirc-wont-setup-device-could-not-get-file-information-for-dev-lirc0
+			
+		If you want to listen to an IR message first (idk somehow the config file I had setup gets lost)
+			Then uncomment the pin 19 thing and comment pin 26 and then setup the circuit as 
+			the original guide explains for receiving the message and then save that to a config file.
+			
+			NOTE: WHEN running the commands to get in the input raw codes use lirc1 instead of lirc0
+			due to the GPIO pins I configured, it seems like lirc1 is the input? idfk.
+
+For circuit diagram for SENDING:
+  https://www.digikey.com/en/maker/tutorials/2021/how-to-send-and-receive-ir-signals-with-a-raspberry-pi

@@ -1,0 +1,25 @@
+Resources Used:
+	How to build a gitignore to exclude everything except...:
+		https://stackoverflow.com/questions/987142/make-gitignore-ignore-everything-except-a-few-files
+
+  Resetting the git commit history to this going commit now (if you accidentally put up secrets, etc):
+    https://stackoverflow.com/questions/13716658/how-to-delete-all-commit-history-in-github
+
+	Size limit on repos (5GB):
+		https://stackoverflow.com/questions/38768454/repository-size-limits-for-github-com
+	
+	How to remove a pushed change to github:
+		https://stackoverflow.com/questions/45492997/how-to-remove-a-pushed-commit-on-github
+	
+	Generating SSH keys and then adding to github:
+		https://www.geeksforgeeks.org/how-to-add-ssh-key-to-your-github-account/
+			Activating the SSH-agent for adding the key:
+				https://stackoverflow.com/questions/17846529/could-not-open-a-connection-to-your-authentication-agent
+
+  Location of the home directory in WSL:
+    https://superuser.com/questions/1791373/location-of-wsl-home-directory-in-windows
+
+  Removing cached files from being included into the .gitignore somehow:
+    https://www.freecodecamp.org/news/gitignore-file-how-to-ignore-files-and-folders-in-git/
+    (git rm --cached -r folderOrFile)
+    Then add that folderOrFile to gitignore (if it wasnt already in there)

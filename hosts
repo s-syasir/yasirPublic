@@ -1,0 +1,83 @@
+# See `man hosts` for details.
+#
+# By default, systemd-resolved or libnss-myhostname will resolve
+# localhost and the system hostname if they're not specified here.
+
+127.0.0.1 localhost
+127.0.1.1 docker0
+#::1 localhost ip6-localhost ip6-loopback
+#ff02::1 ip6-allnodes
+#ff02::2 ip6-allrouters
+#
+::1             localhost
+<LAN_IP>   udm udm.local
+<LAN_IP> poppy poppy.local
+<LAN_IP>  spectre spectre.local
+<LAN_IP>  routie routie.local
+<LAN_IP>   guestie guestie.local
+
+<LAN_IP>  blikvm blikvm.local
+<LAN_IP> babyboi babyboi.local
+<LAN_IP>   lilboi lilboi.local
+<LAN_IP> bigboi bigboi.local
+<LAN_IP>  nasir nasir.local
+<LAN_IP>   truenasir truenasir.local
+
+<LAN_IP>  homie homie.local
+<LAN_IP> RoborockValetudo RoborockValetudo.local
+<LAN_IP>  outsideAirGradient outsideAirGradient.local
+<LAN_IP>   indoorAirGradient indoorAirGradient.local
+
+<LAN_IP> backuppihole backuppihole.local
+<LAN_IP> backupbackuppihole backupbackuppihole.local
+
+<LAN_IP> edge1 edge1.local
+<LAN_IP> edge3 edge3.local
+
+<LAN_IP> jetson jetson.local
+
+# Proxmox VMs
+<LAN_IP> docker0 docker0.local
+<LAN_IP> docker1 docker1.local
+<LAN_IP> dockerArr dockerArr.local
+<LAN_IP> docker3 docker3.local
+<LAN_IP> porty porty.local
+
+<LAN_IP> frigate frigate.local
+<LAN_IP> E1Pro E1Pro.local
+
+# Extras for insanity
+<LAN_IP> spectre-hardwired spectre-hardwired.local
+<LAN_IP> steamy steamy.local
+<LAN_IP>  mr-obama-2-hk1 mr-obama-2-hk1.local
+<LAN_IP> mr-obama-2-hk2 mr-obama-2-hk2.local
+<LAN_IP> mr-obama-2-hkext mr-obama-2-hkext.local
+
+<PUBLIC_IP>     vps vps.local
+
+# Tailscale Ips
+
+<TAILNET_IP>     spectre.tail
+<TAILNET_IP>   poppy.tail
+
+<TAILNET_IP> babyboi.tail
+<TAILNET_IP>  lilboi.tail
+<TAILNET_IP>    bigboi.tail
+<TAILNET_IP>  nasir.tail
+<TAILNET_IP>   truenasir.tail
+
+<TAILNET_IP>   homie.tail
+
+<TAILNET_IP>   backuppihole.tail
+
+<TAILNET_IP>    edge3.tail
+
+<TAILNET_IP>    mr-obama-2.tail
+<TAILNET_IP>    steamy.tail
+
+<TAILNET_IP>   vps.tail
+
+<TAILNET_IP>  docker0.tail
+<TAILNET_IP>   docker1.tail
+<TAILNET_IP>   dockerArr.tail
+<TAILNET_IP>   docker3.tail

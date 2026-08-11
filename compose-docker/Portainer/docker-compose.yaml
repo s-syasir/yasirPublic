@@ -1,0 +1,25 @@
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - <VOLUME>
+    ports:
+#      - "127.0.0.1:8000:8000"
+#      - "127.0.0.1:9443:9443"
+      - "0.0.0.0:9000:9000"
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer-docker0.rule=Host(`portainer-docker0.<HOST>.example.org`) || Host(`portainer-docker0.<HOST>.example.org`)"
+      - "traefik.http.routers.portainer-docker0.entrypoints=websecure"
+      - "traefik.http.routers.portainer-docker0.tls=true"
+      - "traefik.http.services.portainer-docker0.loadbalancer.server.port=9000"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
+

@@ -1,0 +1,32 @@
+services:
+  convertx:
+    image: ghcr.io/c4illin/convertx:latest
+    container_name: convertx
+    restart: unless-stopped
+    volumes:
+      - <VOLUME>
+    environment: # Defaults are listed below. All are optional.
+      - ACCOUNT_REGISTRATION=true # true or false, doesn't matter for the first account (e.g. keep this to false if you only want one account)
+        #     - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() by default
+      - HTTP_ALLOWED=false # setting this to true is unsafe, only set this to true locally
+      - ALLOW_UNAUTHENTICATED=false # allows anyone to use the service without logging in, only set this to true locally
+      - AUTO_DELETE_EVERY_N_HOURS=1 # checks every n hours for files older then n hours and deletes them, set to 0 to disable
+      # - FFMPEG_ARGS=-hwaccel vulkan # additional arguments to pass to ffmpeg
+      # - WEBROOT=/convertx # the root path of the web interface, leave empty to disable
+      # - HIDE_HISTORY=true # hides the history tab in the web interface, defaults to false
+      - TZ=America/Los_Angeles # set your timezone, defaults to UTC
+      # - UNAUTHENTICATED_USER_SHARING=true # for use with ALLOW_UNAUTHENTICATED=true to share history with all unauthenticated users / devices
+#    ports:
+#      - "127.0.0.1:6970:3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.convertx.rule=Host(`convertX.<HOST>.example.org`) || Host(`convertX.<HOST>.example.org`)"
+      - "traefik.http.routers.convertx.entrypoints=websecure"
+      - "traefik.http.routers.convertx.tls=true"
+      - "traefik.http.services.convertx.loadbalancer.server.port=3000"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

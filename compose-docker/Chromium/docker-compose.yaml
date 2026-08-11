@@ -1,0 +1,28 @@
+services:
+  chromium:
+    image: lscr.io/linuxserver/chromium:latest
+    container_name: chromium
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - CHROME_CLI=https://www.linuxserver.io/ #optional
+    volumes:
+      - <VOLUME>
+    ports:
+#      - 0.0.0.0:3069:3000
+      - 0.0.0.0:3070:3001
+    shm_size: "1gb"
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.chromium.rule=Host(`chromium.<HOST>.example.org`) || Host(`chromium.<HOST>.example.org`)"
+      - "traefik.http.routers.chromium.entrypoints=websecure"
+      - "traefik.http.routers.chromium.tls=true"
+      - "traefik.http.services.chromium.loadbalancer.server.port=3001"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

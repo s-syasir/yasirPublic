@@ -1,0 +1,145 @@
+services:
+  portracker:
+    image: mostafawahied/portracker:latest
+    container_name: portracker
+    restart: unless-stopped
+    
+    # Required for comprehensive system port detection
+    # This allows portracker to see all host processes for accurate port mapping
+    pid: "host"
+
+    # Capabilities & security (universal, required)
+    # - SYS_PTRACE enables reading other processes' /proc entries on Linux hosts
+    # - SYS_ADMIN enables namespace entry on Docker Desktop (macOS/Windows)
+    # - apparmor:unconfined disables AppArmor restrictions that may block /proc access
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    
+    volumes:
+      # Required: Data persistence for SQLite database
+      - <VOLUME>
+      
+      # Required: Docker socket access for container discovery
+      # Comment out if using docker-proxy setup below
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      
+      # Advanced: Host filesystem access (usually not needed with pid: "host")
+      # Uncomment only if you experience issues with port detection
+      # - /proc:/host/proc:ro
+      # - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
+    
+    ports:
+      - "4999:4999"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.porttracker-docker0.rule=Host(`porttracker-docker0.<HOST>.example.org`) || Host(`porttracker-docker0.<HOST>.example.org`)"
+      - "traefik.http.routers.porttracker-docker0.entrypoints=websecure"
+      - "traefik.http.routers.porttracker-docker0.tls=true"
+      - "traefik.http.services.porttracker-docker0.loadbalancer.server.port=4999"
+
+    networks:
+      - proxy
+
+    environment:
+      # CORE CONFIGURATION (Required)
+      - DATABASE_PATH=/data/portracker.db
+      - PORT=4999
+      # Tell portracker where to find the host /proc (matches the volume above)
+      - HOST_PROC=/host/proc
+      
+      # DOCKER CONFIGURATION
+      # Uncomment to use with docker-proxy for enhanced security
+      # - DOCKER_HOST=tcp://docker-proxy:2375
+      
+      # TRUENAS INTEGRATION (Optional)
+      # Uncomment and set your API key for enhanced TrueNAS features:
+      # - VM discovery and monitoring
+      # - Enhanced system information
+      # - TrueNAS-specific optimizations
+      # - TRUENAS_API_KEY=your-api-key-here
+      
+      # AUTHENTICATION (Optional - v1.2.0+)
+      # Enable authentication to protect dashboard access
+      # When enabled, users must login to access the dashboard
+      # Note: API endpoints for peer communication remain accessible
+      # - ENABLE_AUTH=true
+      # Optional: Set a custom session secret (recommended for production)
+      # If not set, a random secret is generated (sessions won't persist across restarts)
+      # - SESSION_SECRET=your-random-secret-here-change-this
+      
+      # REVERSE PROXY SUPPORT (Optional)
+      # When running behind a reverse proxy, port links will use the proxy hostname
+      # Set HOST_OVERRIDE to your actual server hostname so port links work correctly
+      # Example: Your server is server.local, but you access Portracker via proxy.domain.com
+      # Set HOST_OVERRIDE=server.local so port links point to server.local:PORT instead
+      # - HOST_OVERRIDE=your-server-hostname
+      
+      # PERFORMANCE SETTINGS (Optional)
+      # Cache duration - increase for better performance, decrease for fresher data
+      # - CACHE_TIMEOUT_MS=60000
+      # Disable caching entirely (not recommended for production)
+      # - DISABLE_CACHE=true
+      
+      # ADVANCED PORT SCANNING (Optional)
+      # Include UDP ports in scans (may increase noise and impact performance)
+      # - INCLUDE_UDP=true
+      
+      # DEVELOPMENT & DEBUGGING (Optional)
+      # Enable verbose logging for troubleshooting
+      # - DEBUG=true
+    
+    # Optional: Health check for monitoring
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4999/api/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+
+
+  # OPTIONAL: Enhanced Security with Docker Socket Proxy
+  # Uncomment the entire section below for additional Docker socket security
+  # This adds a proxy layer between portracker and the Docker socket
+  
+  # docker-proxy:
+  #   image: tecnativa/docker-socket-proxy:latest
+  #   container_name: portracker-docker-proxy
+  #   restart: unless-stopped
+  #   environment:
+  #     # Only allow read operations portracker needs
+  #     - CONTAINERS=1
+  #     - IMAGES=1
+  #     - INFO=1
+  #     - NETWORKS=1
+  #     # Disable write operations for security
+  #     - POST=0
+  #     - BUILD=0
+  #     - COMMIT=0
+  #     - EXEC=0
+  #     - SWARM=0
+  #     - EVENTS=0
+  #     - VOLUMES=0
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   ports:
+  #     - "2375:2375"
+  
+  # When using docker-proxy:
+  # 1. Uncomment the entire docker-proxy service above
+  # 2. Comment out the /var/run/docker.sock volume mount in portracker service
+  # 3. Uncomment the DOCKER_HOST environment variable in portracker service
+  # 4. Add depends_on to portracker service:
+  #    depends_on:
+  #      - docker-proxy
+
+# Optional: Custom networks for isolation
+networks:
+  proxy:
+    external: true
+
+# networks:
+#   portracker:
+#     driver: bridge

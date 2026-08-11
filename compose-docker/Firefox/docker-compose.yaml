@@ -1,0 +1,20 @@
+services:
+  firefox:
+    image: jlesage/firefox
+    ports:
+      - "0.0.0.0:5800:5800"
+    volumes:
+      - <VOLUME>
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.firefox.rule=Host(`firefox.<HOST>.example.org`) || Host(`firefox.<HOST>.example.org`)"
+      - "traefik.http.routers.firefox.entrypoints=websecure"
+      - "traefik.http.routers.firefox.tls=true"
+      - "traefik.http.services.firefox.loadbalancer.server.port=5800"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

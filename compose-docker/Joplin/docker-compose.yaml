@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+#    ports:
+#      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_DB: joplin
+      POSTGRES_USER: joplin
+      POSTGRES_PASSWORD: <REDACTED>
+    volumes:
+      - <VOLUME>
+    restart: unless-stopped
+    networks:
+      - joplin
+
+  joplin:
+    image: joplin/server:latest
+    depends_on:
+        - postgres
+    environment:
+      APP_PORT: 22300
+      APP_BASE_URL: https://joplin.<HOST>.example.org
+      DB_CLIENT: pg
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: joplin
+      POSTGRES_USER: joplin
+      POSTGRES_PASSWORD: <REDACTED>
+      JWT_SECRET: <REDACTED>
+#    ports:
+#      - "127.0.0.1:22300:22300"
+    volumes:
+      - <VOLUME>
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.joplin.rule=Host(`joplin.<HOST>.example.org`) || Host(`joplin.<HOST>.example.org`)"
+      - "traefik.http.routers.joplin.entrypoints=websecure"
+      - "traefik.http.routers.joplin.tls=true"
+      - "traefik.http.services.joplin.loadbalancer.server.port=22300"
+    networks:
+      - joplin
+      - proxy
+
+networks:
+  joplin:
+  proxy:
+    external: true

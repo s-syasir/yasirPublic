@@ -1,0 +1,21 @@
+{
+  "workbench.colorCustomizations": null,
+  "yaml.schemas": {
+    "file:///home/yasir/.vscode/extensions/continue.continue-1.2.16-linux-x64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ],
+    "file:///home/yasir/.vscode/extensions/continue.continue-1.2.17-linux-x64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ],
+    "file:///home/yasir/.vscode/extensions/continue.continue-1.2.18-linux-x64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ],
+    "file:///home/yasir/.vscode/extensions/continue.continue-1.2.22-linux-x64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ],
+    "file:///home/yasir/.vscode/extensions/continue.continue-2.0.0-linux-x64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ]
+  },
+  "explorer.confirmDelete": false
+}

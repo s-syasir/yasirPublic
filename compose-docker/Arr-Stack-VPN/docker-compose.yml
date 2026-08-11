@@ -1,0 +1,271 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun # If running on an LXC see readme for more info.
+    networks:
+      proxy:
+      servarrnetwork:
+        ipv4_address: 172.39.0.2
+    ports:
+      - 8080:8080 # qbittorrent web interface
+      - 6881:6881 # qbittorrent torrent port
+      - 6789:6789 # nzbget
+      - 9696:9696 # prowlarr
+    volumes:
+      - <VOLUME>
+    # Make a '.env' file in the same directory.
+    env_file:
+      - .env
+    healthcheck:
+      test: ping -c 1 www.google.com || exit 1
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      # qbittorrent
+      - "traefik.http.routers.qbittorrent.rule=Host(`qbittorrent.<HOST>.example.org`) || Host(`qbittorrent.<HOST>.example.org`)"
+      - "traefik.http.routers.qbittorrent.entrypoints=websecure"
+      - "traefik.http.routers.qbittorrent.tls=true"
+      - "traefik.http.routers.qbittorrent.service=qbittorrent"
+      - "traefik.http.services.qbittorrent.loadbalancer.server.port=8080"
+      # prowlarr
+      - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.<HOST>.example.org`) || Host(`prowlarr.<HOST>.example.org`)"
+      - "traefik.http.routers.prowlarr.entrypoints=websecure"
+      - "traefik.http.routers.prowlarr.tls=true"
+      - "traefik.http.routers.prowlarr.service=prowlarr"
+      - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"
+      # nzbget
+      - "traefik.http.routers.nzbget.rule=Host(`nzbget.<HOST>.example.org`) || Host(`nzbget.<HOST>.example.org`)"
+      - "traefik.http.routers.nzbget.entrypoints=websecure"
+      - "traefik.http.routers.nzbget.tls=true"
+      - "traefik.http.routers.nzbget.service=nzbget"
+      - "traefik.http.services.nzbget.loadbalancer.server.port=6789"
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    labels:
+      - deunhealth.restart.on.unhealthy=true
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - WEBUI_PORT=8080 # must match "qbittorrent web interface" port number in gluetun's service above
+      # - TORRENTING_PORT=51413 # airvpn forwarded port, pulled from .env (not in our case because we dont use in this config.)
+      - MEDIA_DIR=/arr-share
+    volumes:
+      - <VOLUME>
+      # Baseline data dir. Not the NAS, so commented out
+      # - <VOLUME>
+      - "<NAS_MOUNT>:/arr-share:rw"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+        restart: true
+    network_mode: service:gluetun
+    healthcheck:
+      test: ping -c 1 www.google.com || exit 1
+      interval: 60s
+      retries: 3
+      start_period: 20s
+      timeout: 10s
+
+  # See the 'qBittorrent Stalls with VPN Timeout' section for more information.
+  deunhealth:
+    image: qmcgaw/deunhealth
+    container_name: deunhealth
+    network_mode: "none"
+    environment:
+      - LOG_LEVEL=info
+      - HEALTH_SERVER_ADDRESS=127.0.0.1:9999
+      - TZ=${TZ}
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  nzbget:
+    image: lscr.io/linuxserver/nzbget:latest
+    container_name: nzbget
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - <VOLUME>
+      # Baseline data dir. Not the NAS, so commented out
+      # - <VOLUME>
+      - "<NAS_MOUNT>:/arr-share:rw"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+        restart: true
+    restart: unless-stopped
+    network_mode: service:gluetun
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - <VOLUME>
+      - "<NAS_MOUNT>:/arr-share:rw"
+    restart: unless-stopped
+    depends_on:
+      gluetun:
+        condition: service_healthy
+        restart: true
+    network_mode: service:gluetun
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - <VOLUME>
+      # - <VOLUME>
+      - "<NAS_MOUNT>:/arr-share:rw"
+      - "<NAS_MOUNT> Shows:/Cold_Store/big_store/TV Shows:rw"
+      - "<NAS_MOUNT>:/Cold_Store/big_store/Anime:rw"
+    ports:
+      - 8989:8989
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.<HOST>.example.org`) || Host(`sonarr.<HOST>.example.org`)"
+      - "traefik.http.routers.sonarr.entrypoints=websecure"
+      - "traefik.http.routers.sonarr.tls=true"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+    networks:
+      proxy:
+      servarrnetwork:
+        ipv4_address: 172.39.0.3
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - <VOLUME>
+      # - <VOLUME>
+      - "<NAS_MOUNT>:/arr-share:rw"
+      - "<NAS_MOUNT>:/Cold_Store/big_store/Movies:rw"
+    ports:
+      - 7878:7878
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.<HOST>.example.org`) || Host(`radarr.<HOST>.example.org`)"
+      - "traefik.http.routers.radarr.entrypoints=websecure"
+      - "traefik.http.routers.radarr.tls=true"
+      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
+    networks:
+      proxy:
+      servarrnetwork:
+        ipv4_address: 172.39.0.4
+
+  lidarr:
+    container_name: lidarr
+    image: lscr.io/linuxserver/lidarr:latest
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - <VOLUME>
+      # - <VOLUME>
+      - "<NAS_MOUNT>:/arr-share:rw"
+      - "<NAS_MOUNT>:/Common/Windows/Music:rw"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    ports:
+      - 8686:8686
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lidarr.rule=Host(`lidarr.<HOST>.example.org`) || Host(`lidarr.<HOST>.example.org`)"
+      - "traefik.http.routers.lidarr.entrypoints=websecure"
+      - "traefik.http.routers.lidarr.tls=true"
+      - "traefik.http.services.lidarr.loadbalancer.server.port=8686"
+    networks:
+      proxy:
+      servarrnetwork:
+        ipv4_address: 172.39.0.5
+
+#  readarr:
+#    container_name: readarr
+#    image: lscr.io/linuxserver/readarr:develop
+#    restart: unless-stopped
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - <VOLUME>
+#      # - <PATH>:/data
+#      - "<NAS_MOUNT>:/arr-share:rw"
+#      - "<NAS_MOUNT>:/Common/Windows/Desktop/Store/Books:rw"
+#    environment:
+#      - PUID=${PUID}
+#      - PGID=${PGID}
+#      - TZ=${TZ}
+#    ports:
+#      - 8787:8787
+#    networks:
+#      proxy:
+#      servarrnetwork:
+#        ipv4_address: 172.39.0.7
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - <VOLUME>
+      # - <VOLUME>
+      - "<NAS_MOUNT>:/arr-share:rw"
+      - "<NAS_MOUNT> Shows:/Cold_Store/big_store/TV Shows:rw"
+      - "<NAS_MOUNT>:/Cold_Store/big_store/Anime:rw"
+      - "<NAS_MOUNT>:/Cold_Store/big_store/Movies:rw"
+      - "<NAS_MOUNT>:/Common/Windows/Music:rw"
+    ports:
+      - 6767:6767
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bazarr.rule=Host(`bazarr.<HOST>.example.org`) || Host(`bazarr.<HOST>.example.org`)"
+      - "traefik.http.routers.bazarr.entrypoints=websecure"
+      - "traefik.http.routers.bazarr.tls=true"
+      - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
+    networks:
+      proxy:
+      servarrnetwork:
+        ipv4_address: 172.39.0.6
+
+networks:
+  servarrnetwork:
+    name: servarrnetwork
+    ipam:
+      config:
+        - subnet: 172.39.0.0/24
+  proxy:
+    external: true
