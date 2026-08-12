@@ -11,6 +11,10 @@ services:
       # window (qwen3.5 = 256K) silently pushes layers onto CPU mid-conversation and
       # just feels 'randomly slow'. Hard ceiling here applies to every client.
       - OLLAMA_CONTEXT_LENGTH=8192
+      # Keep a model resident instead of unloading after the 5m default. Reloading
+      # 3.3GB into the Arc dominated first-token latency on every cold request.
+      # A different model still evicts this one; 4.9 GiB does not hold two.
+      - OLLAMA_KEEP_ALIVE=-1
     devices:
       - /dev/dri:/dev/dri
     group_add:
