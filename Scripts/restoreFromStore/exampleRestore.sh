@@ -20,8 +20,12 @@ cp -r "$STORE/.bashrc" "$HOME/"
 
 # Fuller case, if this host's backup carries more. Uncomment what applies:
 #
-#   rm -rf "$HOME/.config" "$HOME/.local"
-#   rsync -a "$STORE/.config" "$STORE/.local" "$HOME/"
+#   rsync -a "$STORE/.config/." "$HOME/.config/"
+#
+# Do NOT `rm -rf "$HOME/.config"` first. It is tempting, because `cp -r` into an existing
+# directory nests it (~/.config/.config) instead of merging -- but .config holds state no
+# backup captures (this exact mistake wiped an entire emulator setup, repeatedly, on every
+# maintenance run). rsync with a trailing /. merges correctly and deletes nothing.
 #
 # System files usually want reviewing rather than blind copying - a stale /etc from
 # another host's backup will break more than it fixes:

@@ -26,6 +26,7 @@ com.protonvpn.www
 com.retrodev.blastem
 com.rustdesk.RustDesk
 com.st.STM32CubeIDE
+com.supermodel3.Supermodel
 com.tdameritrade.ThinkOrSwim
 com.transmissionbt.Transmission
 com.ultimaker.cura
@@ -39,6 +40,7 @@ io.github.punesemu.puNES
 io.github.ryubing.Ryujinx
 io.github.sameboy.SameBoy
 io.github.sharkwouter.Minigalaxy
+io.github.shiiion.primehack
 io.github.ungoogled_software.ungoogled_chromium
 io.github.xyproto.zsnes
 io.gitlab.librewolf-community
@@ -53,6 +55,7 @@ one.flipperzero.qFlipper
 org.DolphinEmu.dolphin-emu
 org.apache.netbeans
 org.audacityteam.Audacity
+org.azahar_emu.Azahar
 org.blender.Blender
 org.citra_emu.citra
 org.codeblocks.codeblocks
@@ -84,6 +87,7 @@ org.ppsspp.PPSSPP
 org.raspberrypi.rpi-imager
 org.remmina.Remmina
 org.ryujinx.Ryujinx
+org.scummvm.ScummVM
 org.signal.Signal
 org.soapui.SoapUI
 org.standardnotes.standardnotes

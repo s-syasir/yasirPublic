@@ -1,0 +1,13 @@
+[Unit]
+Description=Keep emulator save symlinks pointing at the synced folder
+
+[Timer]
+# At boot, because a restore or reimage can drop the links.
+OnBootSec=2min
+# And hourly, because running EmuDeck replaces the symlinks with real directories and
+# saves then silently stop syncing -- with no error to notice. This self-heals it.
+OnUnitActiveSec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,14 @@
+[Unit]
+Description=Re-point emulator save dirs into ~/emulator-saves (Syncthing-shared)
+Documentation=file:%h/emulator-saves/setup-symlinks.sh
+After=network-online.target
+
+[Service]
+Type=oneshot
+# The script itself lives in the Syncthing-shared folder, so editing it on one machine
+# updates every machine. It is idempotent: with everything already linked it prints SKIP
+# and writes nothing, not even a backup.
+ExecStart=%h/emulator-saves/setup-symlinks.sh --quiet
+
+[Install]
+WantedBy=default.target
