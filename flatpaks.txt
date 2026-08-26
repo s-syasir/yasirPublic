@@ -61,7 +61,6 @@ org.citra_emu.citra
 org.codeblocks.codeblocks
 org.deluge_torrent.deluge
 org.desmume.DeSmuME
-org.duckstation.DuckStation
 org.eclipse.Java
 org.eclipse.iot.fourdiac.Ide
 org.filezillaproject.Filezilla

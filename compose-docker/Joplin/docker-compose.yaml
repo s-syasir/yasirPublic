@@ -42,6 +42,12 @@ services:
       - joplin
       - proxy
 
+  # fork-backend is NOT here - it needs to reach the headless Joplin Desktop's
+  # Data API, which binds to 127.0.0.1 only, so it runs as a plain systemd
+  # --user service directly on the host instead of a container. See
+  # ~/Fork-backend/README.md. Routed via Traefik's file provider (like
+  # netalertX/upsnap) in Traefik/config/dynamic/dynamic.yml, not here.
+
 networks:
   joplin:
   proxy:

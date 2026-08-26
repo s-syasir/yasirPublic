@@ -20,8 +20,8 @@ Stacks included: `Actual`, `Arr-Stack-VPN`, `Chromium`, `ConvertX`, `FileWizard`
 
 ## What's not here, and why
 
-The private repo is ~165k tracked files. The overwhelming majority is excluded by
-policy — **257 files** — not because anything was wrong with them:
+The private repo is ~173k tracked files. The overwhelming majority is excluded by
+policy — **260 files** — not because anything was wrong with them:
 
 - **`Store/`** — machine-generated backups of `/etc`, `/root` and `/sbin` from every host.
   ~164k files of raw system state. Never published.

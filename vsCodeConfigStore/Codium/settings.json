@@ -7,7 +7,7 @@
     "editor.tabSize": 4,
     "editor.wordWrap": "on",
     "editor.minimap.enabled": true,
-    "workbench.colorTheme": "Dark Modern",
+    "workbench.colorTheme": "Default Dark Modern",
     "terminal.integrated.fontSize": 14,
     "files.autoSave": "afterDelay",
     "files.autoSaveDelay": 100,
