@@ -74,3 +74,6 @@ sudo chown -R "$(id -un)" "$STORE/docker/" 2>/dev/null || true
 # generated lists, without the host-specific system and service data.
 ionice -c 3 rsync -a "$STORE"/.[!.]* "$ARCHETYPE/"
 ionice -c 3 rsync -a --exclude='slashStuff' --exclude='docker' "$STORE/" "$ARCHETYPE/"
+
+# reset ownership so the next run can overwrite: sudo rsync + the archetypes mirror leave root-owned files
+sudo chown -R "$USER" ~/Store
