@@ -15,6 +15,7 @@ services:
       - 6881:6881 # qbittorrent torrent port
       - 6789:6789 # nzbget
       - 9696:9696 # prowlarr
+      - 8191:8191 # flaresolverr
     volumes:
       - <VOLUME>
     # Make a '.env' file in the same directory.
@@ -46,6 +47,12 @@ services:
       - "traefik.http.routers.nzbget.tls=true"
       - "traefik.http.routers.nzbget.service=nzbget"
       - "traefik.http.services.nzbget.loadbalancer.server.port=6789"
+      # flaresolverr
+      - "traefik.http.routers.flaresolverr.rule=Host(`flaresolverr.<HOST>.example.org`) || Host(`flaresolverr.<HOST>.example.org`)"
+      - "traefik.http.routers.flaresolverr.entrypoints=websecure"
+      - "traefik.http.routers.flaresolverr.tls=true"
+      - "traefik.http.routers.flaresolverr.service=flaresolverr"
+      - "traefik.http.services.flaresolverr.loadbalancer.server.port=8191"
 
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
@@ -122,6 +129,23 @@ services:
       - <VOLUME>
       - "<NAS_MOUNT>:/arr-share:rw"
     restart: unless-stopped
+    depends_on:
+      gluetun:
+        condition: service_healthy
+        restart: true
+    network_mode: service:gluetun
+
+  # FlareSolverr - solves Cloudflare challenges for Prowlarr (EBookBay, AudioBookBay,
+  # Torrent Downloads, BitSearch). Shares gluetun's netns so the clearance cookie is tied
+  # to the same VPN exit IP Prowlarr requests from. Prowlarr reaches it at localhost:8191.
+  # ~1GB RAM (headless Chromium).
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+    environment:
+      - LOG_LEVEL=info
+      - TZ=${TZ}
     depends_on:
       gluetun:
         condition: service_healthy
@@ -260,6 +284,42 @@ services:
       proxy:
       servarrnetwork:
         ipv4_address: 172.39.0.6
+
+  # Chaptarr - Readarr-fork book manager (audiobooks + ebooks). Standalone like
+  # sonarr/radarr, not behind the VPN. Reaches prowlarr at gluetun:9696 and the
+  # download clients at gluetun:8080 (qbit) / gluetun:6789 (nzbget) over servarrnetwork.
+  # Not a linuxserver image, but honours PUID/PGID/TZ the same way.
+  chaptarr:
+    image: chaptarr/chaptarr:latest
+    container_name: chaptarr
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      # - UMASK=002   # uncomment if imported files land group-unwritable on the NAS share
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - <VOLUME>
+      # import source: where qbit/nzbget drop completed grabs (same mount the other arrs use)
+      - "<NAS_MOUNT>:/arr-share:rw"
+      # library roots. Set Chaptarr's audiobook root to /Common/Windows/Music/Audiobooks so it
+      # rides the Music-folder sync to phone/laptop/PC; ebook root -> /Common/Windows/Desktop/Store/Books.
+      # Different mount from /arr-share, so imports COPY, not hardlink (same as sonarr -> Cold_Store).
+      - "<NAS_MOUNT>:/Common/Windows/Music:rw"
+      - "<NAS_MOUNT>:/Common/Windows/Desktop/Store/Books:rw"
+    ports:
+      - 8789:8789
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.chaptarr.rule=Host(`chaptarr.<HOST>.example.org`) || Host(`chaptarr.<HOST>.example.org`)"
+      - "traefik.http.routers.chaptarr.entrypoints=websecure"
+      - "traefik.http.routers.chaptarr.tls=true"
+      - "traefik.http.services.chaptarr.loadbalancer.server.port=8789"
+    networks:
+      proxy:
+      servarrnetwork:
+        ipv4_address: 172.39.0.8
 
 networks:
   servarrnetwork:
