@@ -303,11 +303,11 @@ services:
       - <VOLUME>
       # import source: where qbit/nzbget drop completed grabs (same mount the other arrs use)
       - "<NAS_MOUNT>:/arr-share:rw"
-      # library roots. Set Chaptarr's audiobook root to /Common/Windows/Music/Audiobooks so it
-      # rides the Music-folder sync to phone/laptop/PC; ebook root -> /Common/Windows/Desktop/Store/Books.
+      # library roots. Audiobooks moved out of the synced Music folder (was causing the whole
+      # library to sync to phone) -> now lives at Desktop/Store/Audiobooks, sibling to Books.
+      # Mount the Store parent so both Books and Audiobooks are visible under one path.
       # Different mount from /arr-share, so imports COPY, not hardlink (same as sonarr -> Cold_Store).
-      - "<NAS_MOUNT>:/Common/Windows/Music:rw"
-      - "<NAS_MOUNT>:/Common/Windows/Desktop/Store/Books:rw"
+      - "<NAS_MOUNT>:/Common/Windows/Desktop/Store:rw"
     ports:
       - 8789:8789
     labels:
