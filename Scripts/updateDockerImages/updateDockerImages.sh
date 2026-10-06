@@ -41,16 +41,44 @@ for dir in "$BASE_DIR"/*/; do
             exit 3
         fi
 
+        # Image each container runs now, so a failed post-update check can put it back.
+        prev_images=$(for c in $(sudo docker compose ps -q); do
+            sudo docker inspect -f '{{.Config.Image}} {{.Image}}' "$c"
+        done | sort -u)
+
         echo "PULLING $dir (containers stay up during the download)..."
-        if ! sudo docker compose pull; then
+        # --ignore-buildable: locally built images can't be pulled; they're rebuilt below.
+        if ! sudo docker compose pull --ignore-buildable; then
             echo "PULL FAILED in $dir, leaving it running on its current images."
             exit 2
+        fi
+
+        # Stacks with a build: section (e.g. a custom Dockerfile) rebuild on a freshly pulled base.
+        if sudo docker compose config 2>/dev/null | grep -qE '^ +build:'; then
+            echo "BUILDING locally built images in $dir..."
+            if ! sudo docker compose build --pull; then
+                echo "BUILD FAILED in $dir, leaving it running on its current images."
+                exit 2
+            fi
         fi
 
         echo "RECREATING any container whose image changed in $dir..."
         if ! sudo docker compose up -d; then
             echo "UP FAILED in $dir."
             exit 2
+        fi
+
+        # Optional per-stack smoke test. A non-zero exit restores the previous images.
+        if [[ -x ./post-update-check.sh ]]; then
+            echo "CHECKING $dir with post-update-check.sh..."
+            if ! ./post-update-check.sh; then
+                echo "CHECK FAILED in $dir, rolling back to the previous images."
+                while read -r ref id; do
+                    [[ -n "$ref" ]] && sudo docker tag "$id" "$ref"
+                done <<< "$prev_images"
+                sudo docker compose up -d --no-build --pull never
+                exit 2
+            fi
         fi
     )
 

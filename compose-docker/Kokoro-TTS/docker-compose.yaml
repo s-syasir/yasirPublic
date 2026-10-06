@@ -1,0 +1,12 @@
+services:
+  kokoro-tts:
+    # Text-to-speech for Open WebUI/Conduit voice (OpenAI-style /v1/audio/speech). CPU on purpose: the B60 is full with the LLM.
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
+    container_name: kokoro-tts
+    restart: unless-stopped
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

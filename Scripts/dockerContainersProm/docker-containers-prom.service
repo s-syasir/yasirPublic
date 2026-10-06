@@ -1,0 +1,7 @@
+[Unit]
+Description=Export Docker container state for prometheus-node-exporter
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/docker-containers-prom.sh

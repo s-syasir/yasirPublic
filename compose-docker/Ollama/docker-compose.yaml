@@ -1,9 +1,10 @@
 services:
   ollama:
-    image: ollama/ollama:latest
+    # Built from ./Dockerfile (official ollama + newer Mesa for the Arc B60); updateDockerImages.sh rebuilds it with --pull.
+    build: .
+    image: ollama-mesa:local
     container_name: ollama
     restart: unless-stopped
-    pull_policy: always
     tty: true
     environment:
       - OLLAMA_HOST=0.0.0.0

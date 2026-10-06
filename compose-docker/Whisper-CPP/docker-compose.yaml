@@ -1,0 +1,50 @@
+services:
+  whisper-cpp:
+    # Built from ./Dockerfile: official whisper.cpp images use AVX-512 and crash (SIGILL) on the Ryzen 5700G.
+    build: .
+    image: whisper-cpp-vulkan:local
+    container_name: whisper-cpp
+    restart: unless-stopped
+    command: ["whisper-server", "--host", "0.0.0.0", "--port", "8080", "-m", "/models/ggml-large-v3-turbo-q8_0.bin",
+              # Server defaults to greedy decoding, which loops on repeated lines; match whisper-cli.
+              "--beam-size", "5", "--best-of", "5",
+              # Silence otherwise comes back as hallucinated "Thank you." lines.
+              "--vad", "--vad-model", "/models/ggml-silero-v5.1.2.bin",
+              # Gentler than defaults (0.5 / 30 ms) so quiet dialogue under music is kept.
+              "--vad-threshold", "0.3", "--vad-speech-pad-ms", "300"]
+    devices:
+      - /dev/dri:/dev/dri
+    group_add:
+      - video
+      - 110
+    volumes:
+      - <VOLUME>
+    networks:
+      - whisper
+
+  whisper-asr-shim:
+    # Speaks whisper-asr-webservice's /asr API so Bazarr's Whisper provider works unchanged.
+    build: ./shim
+    image: whisper-asr-shim:local
+    container_name: whisper-asr-shim
+    restart: unless-stopped
+    environment:
+      - WHISPER_URL=http://whisper-cpp:8080
+    depends_on:
+      - whisper-cpp
+    ports:
+      - "<LAN_IP>:9010:8000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whisper-asr.rule=Host(`whisper.<HOST>.example.org`) || Host(`whisper.<HOST>.example.org`)"
+      - "traefik.http.routers.whisper-asr.entrypoints=websecure"
+      - "traefik.http.routers.whisper-asr.tls=true"
+      - "traefik.http.services.whisper-asr.loadbalancer.server.port=8000"
+    networks:
+      - whisper
+      - proxy
+
+networks:
+  whisper:
+  proxy:
+    external: true
