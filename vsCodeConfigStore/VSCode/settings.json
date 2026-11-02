@@ -1,14 +1,244 @@
 {
-  "workbench.colorCustomizations": null,
-  "yaml.schemas": {
-    "file:///home/yasir/.vscode/extensions/continue.continue-1.2.16-linux-x64/config-yaml-schema.json": [
-      ".continue/**/*.yaml"
+    // ===== Look =====
+    "workbench.colorTheme": "Vitesse Black",
+    "workbench.iconTheme": "material-icon-theme",
+    "editor.fontFamily": "'Fira Code', monospace",
+    // ligatures: => != >= etc. render as single glyphs
+    "editor.fontLigatures": true,
+    "editor.fontSize": 14,
+    "editor.lineHeight": 22,
+    "terminal.integrated.fontFamily": "'MesloLGS NF'",
+    "terminal.integrated.fontSize": 14,
+    "editor.cursorBlinking": "smooth",
+    "editor.cursorSmoothCaretAnimation": "on",
+    "editor.smoothScrolling": true,
+    "workbench.list.smoothScrolling": true,
+    "terminal.integrated.smoothScrolling": true,
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    "editor.minimap.enabled": true,
+    "workbench.editor.editorActionsLocation": "titleBar",
+    "zenMode.centerLayout": true,
+
+    // ===== Editing =====
+    "editor.tabSize": 4,
+    "editor.wordWrap": "on",
+    // edit an HTML/JSX tag and its closing tag together
+    "editor.linkedEditing": true,
+    // pins the enclosing function/class headers to the top while scrolling
+    "editor.stickyScroll.enabled": true,
+    // type/param hints only while holding Ctrl+Alt
+    "editor.inlayHints.enabled": "offUnlessPressed",
+    // save when switching file/window; per-keystroke saves made format-on-save fight typing
+    "files.autoSave": "onFocusChange",
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit",
+        "source.organizeImports": "explicit",
+    },
+
+    // ===== Files & explorer =====
+    "explorer.confirmDelete": false,
+    "explorer.enableUndo": true,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.exclude": {
+        "**/.git": true,
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+    },
+    // single-click opens a real tab instead of a replaceable italic preview tab
+    "workbench.editor.enablePreview": false,
+    // collapse generated/companion files under their parent in the explorer
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.expand": false,
+    "explorer.fileNesting.patterns": {
+        "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb, .npmrc, .nvmrc",
+        "pubspec.yaml": "pubspec.lock, analysis_options.yaml, .metadata",
+        "Cargo.toml": "Cargo.lock",
+        "pyproject.toml": "poetry.lock, uv.lock, requirements*.txt, setup.cfg",
+        "go.mod": "go.sum",
+        "build.gradle*": "settings.gradle*, gradle.properties, gradlew*",
+        "tsconfig.json": "tsconfig.*.json",
+        "*.ts": "${capture}.test.ts, ${capture}.spec.ts",
+        "*.js": "${capture}.test.js, ${capture}.spec.js, ${capture}.js.map",
+    },
+
+    // ===== Terminal =====
+    "terminal.integrated.defaultProfile.linux": "bash",
+    // default is 1000 lines, too short for build logs
+    "terminal.integrated.scrollback": 10000,
+
+    // ===== Git =====
+    "git.enableSmartCommit": true,
+    "git.confirmSync": true,
+    "git.autofetch": true,
+    "git.openRepositoryInParentFolders": "never",
+    "diffEditor.ignoreTrimWhitespace": false,
+
+    // ===== Privacy: telemetry and phone-home off =====
+    "telemetry.telemetryLevel": "off",
+    "telemetry.editStats.enabled": false,
+    "telemetry.feedback.enabled": false,
+    // older keys, kept as a belt-and-braces fallback
+    "telemetry.enableTelemetry": false,
+    "telemetry.enableCrashReporter": false,
+    // A/B experiments and settings search both call Microsoft servers
+    "workbench.enableExperiments": false,
+    "workbench.settings.enableNaturalLanguageSearch": false,
+    // npm hover info is fetched from the registry on every hover
+    "npm.fetchOnlinePackageInfo": false,
+    // hides built-in Copilot chat; Continue and Claude Code are used instead
+    "chat.disableAIFeatures": true,
+    "gitlens.telemetry.enabled": false,
+    "continue.telemetryEnabled": false,
+    "dotnetAcquisitionExtension.enableTelemetry": false,
+    "code-runner.enableAppInsights": false,
+    "redhat.telemetry.enabled": false,
+
+    // ===== Extensions =====
+    // editors' bundled ripgrep moved paths and Todo Tree can't find it; use the apt one
+    "todo-tree.ripgrep.ripgrep": "/usr/bin/rg",
+    // no "recommended extensions" popups or badges
+    "extensions.ignoreRecommendations": true,
+    // GitLens "Launchpad" status bar item (pull-request hub, mostly paid features)
+    "gitlens.launchpad.indicator.enabled": false,
+    // no GitKraken AI features or paid "Pro" prompts
+    "gitlens.ai.enabled": false,
+    "gitlens.plusFeatures.enabled": false,
+    "gitlens.cloudPatches.enabled": false,
+    // on by default: Red Hat/IBM cloud AI for playbooks
+    "ansible.lightspeed.enabled": false,
+    // spelling as faint hints, otherwise Error Lens prints every unknown identifier inline
+    "cSpell.diagnosticLevel": "Hint",
+    "errorLens.enabledDiagnosticLevels": ["error", "warning", "info"],
+    "todo-tree.general.tags": ["TODO", "FIXME", "HACK", "BUG", "XXX", "NOTE"],
+    "todo-tree.filtering.excludeGlobs": [
+        "**/node_modules/*/**",
+        "**/build/*/**",
+        "**/.venv/*/**",
+        "**/.dart_tool/*/**",
     ],
-    "file:///home/yasir/.vscode/extensions/continue.continue-1.2.22-linux-x64/config-yaml-schema.json": [
-      ".continue/**/*.yaml"
+    // terminal so programs that read stdin work
+    "code-runner.runInTerminal": true,
+    "code-runner.saveFileBeforeRun": true,
+    "code-runner.clearPreviousOutput": true,
+    // no A/B experiments (they call Microsoft) or "what's new"/recommendation pop-ups
+    "python.experiments.enabled": false,
+    "jupyter.experiments.enabled": false,
+    "gitlens.showWhatsNewAfterUpgrades": false,
+    "java.help.showReleaseNotes": false,
+    "dart.showExtensionRecommendations": false,
+    "yaml.extension.recommendations": false,
+    // Emulate only ships a macOS default path
+    "emulator.emulatorPathLinux": "~/Android/Sdk/emulator",
+    // plain "python" only exists via python-is-python3
+    "code-runner.executorMap": {
+        "python": "python3 -u",
+    },
+    // Hybrid starts in syntax-only mode and waits for a click to import the project
+    "java.server.launchMode": "Standard",
+    "java.configuration.runtimes": [
+        { "name": "JavaSE-11", "path": "/usr/lib/jvm/java-11-openjdk-amd64" },
+        { "name": "JavaSE-17", "path": "/usr/lib/jvm/java-17-openjdk-amd64" },
+        {
+            "name": "JavaSE-21",
+            "path": "/usr/lib/jvm/java-21-openjdk-amd64",
+            "default": true,
+        },
     ],
-    "file:///home/yasir/.vscode/extensions/continue.continue-2.0.0-linux-x64/config-yaml-schema.json": [
-      ".continue/**/*.yaml"
-    ]
-  }
+    "dart.flutterHotReloadOnSave": "all",
+    // schemastore's catalog no longer parses in Even Better TOML, so schemas never worked; off stops the startup error and download
+    "evenBetterToml.schema.enabled": false,
+
+    // ===== Continue =====
+    "continue.enableTabAutocomplete": true,
+
+    // ===== Languages =====
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+        },
+    },
+    "isort.args": ["--profile", "black"],
+    // basedpyright is the language server; "None" stops the Python ext starting Jedi as a duplicate
+    "python.languageServer": "None",
+    "basedpyright.analysis.typeCheckingMode": "standard",
+    "[csharp]": {
+        "editor.defaultFormatter": "muhammad-sammy.csharp",
+    },
+    "[c]": {
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+        "editor.semanticHighlighting.enabled": true,
+    },
+    "[cpp]": {
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+        "editor.semanticHighlighting.enabled": true,
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "prettier.singleQuote": false,
+    "prettier.trailingComma": "all",
+    "prettier.tabWidth": 4,
+    "eslint.enable": true,
+    "eslint.lintTask.enable": true,
+    "[dart]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.detectIndentation": false,
+        "editor.suggest.insertMode": "replace",
+        "editor.defaultFormatter": "Dart-Code.dart-code",
+    },
+    "[go]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+        },
+    },
+    "[dockercompose]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.autoIndent": "advanced",
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": false,
+            "strings": true,
+        },
+    },
+    "[dockerfile]": {
+        "editor.quickSuggestions": {
+            "strings": true,
+        },
+    },
+    "[ansible]": {
+        "editor.detectIndentation": true,
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.quickSuggestions": {
+            "comments": true,
+            "other": true,
+            "strings": true,
+        },
+        "editor.autoIndent": "advanced",
+    },
+    "[shellscript]": {
+        "editor.defaultFormatter": "mkhl.shfmt",
+        "files.eol": "\n",
+        "editor.defaultColorDecorators": "never",
+    },
+    "yaml.schemas": {
+        "file:///home/yasir/.vscode/extensions/continue.continue-2.0.0-linux-x64/config-yaml-schema.json": [
+            ".continue/**/*.yaml"
+        ]
+    },
+    "gitlens.graph.details.location": "auto",
 }

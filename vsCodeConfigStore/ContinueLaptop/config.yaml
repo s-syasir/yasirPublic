@@ -1,32 +1,74 @@
 name: Local Agent
 version: 1.1.0
 schema: v1
+
+# Pick the active chat/edit model from Continue's dropdown.
+# Homelab is only up ~1pm-8pm; outside that, switch to the "local" entries.
 models:
-  - name: Qwen2.5-Coder 7B
+  - name: Qwen2.5-Coder 7B (homelab)
     provider: ollama
     model: qwen2.5-coder:7b
     apiBase: "https://ollama.<HOST>.example.org"
+    # emits tool calls as plain text, so keep it out of Agent mode
+    capabilities: []
     roles:
-      - autocomplete
-      - apply
       - chat
       - edit
+      - apply
 
-  - name: Qwen2.5-Coder 1.5B --local
+  - name: Qwen2.5-Coder 7B (local)
+    provider: ollama
+    model: qwen2.5-coder:7b
+    apiBase: "http://localhost:11434"
+    # emits tool calls as plain text, so keep it out of Agent mode
+    capabilities: []
+    roles:
+      - chat
+      - edit
+      - apply
+
+  - name: Qwen2.5-Coder 3B (local, faster)
+    provider: ollama
+    model: qwen2.5-coder:3b
+    apiBase: "http://localhost:11434"
+    # emits tool calls as plain text, so keep it out of Agent mode
+    capabilities: []
+    roles:
+      - chat
+      - edit
+      - apply
+
+  # Qwen2.5-Coder can't do real tool calls; Qwen3 can, so use this one for Agent mode
+  - name: Qwen3 4B (local, agent)
+    provider: ollama
+    model: qwen3:4b
+    apiBase: "http://localhost:11434"
+    capabilities:
+      - tool_use
+    roles:
+      - chat
+      - edit
+      - apply
+
+  # always local: autocomplete needs low latency and must work when the homelab is off
+  - name: Qwen2.5-Coder 1.5B (local autocomplete)
     provider: ollama
     model: qwen2.5-coder:1.5b
     apiBase: "http://localhost:11434"
     roles:
       - autocomplete
-      - apply
-      - chat
-      - edit
+    autocompleteOptions:
+      # CPU inference: wait a bit longer before firing, keep prompts small
+      debounceDelay: 300
+      maxPromptTokens: 1024
 
-  - name: Nomic Embed
+  - name: Nomic Embed (local)
     provider: ollama
     model: nomic-embed-text:latest
+    apiBase: "http://localhost:11434"
     roles:
       - embed
+
 context:
   - provider: code
   - provider: docs

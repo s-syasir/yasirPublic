@@ -1,2 +1,2 @@
 #!/bin/bash
-systemctl --user start sunshine
+systemctl --user start app-dev.lizardbyte.app.Sunshine

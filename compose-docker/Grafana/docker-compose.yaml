@@ -16,6 +16,7 @@ services:
       - GF_SMTP_SKIP_VERIFY=true
       - GF_PLUGINS_PREINSTALL_DISABLED=true
       - GF_SERVER_ROOT_URL=https://grafana.<HOST>.example.org
+      - GF_DATABASE_WAL=true
     restart: unless-stopped
     labels:
       - "traefik.enable=true"

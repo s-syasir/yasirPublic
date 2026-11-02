@@ -47,10 +47,10 @@ services:
 
   jellyseerr:
     container_name: jellyseerr
-    image: fallenbagel/jellyseerr:latest
+    # Seerr is Jellyseerr's successor; 2.7.3 can't sign in to Jellyfin 12 (legacy auth headers removed).
+    image: ghcr.io/seerr-team/seerr:latest
+    init: true
     environment:
-      - PUID=1000
-      - PGID=1000
       - TZ=America/Los_Angeles
     volumes:
       - <VOLUME>
