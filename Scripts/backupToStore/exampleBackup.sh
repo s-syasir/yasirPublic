@@ -42,7 +42,7 @@ sudo chown -R "$(id -un)" "$STORE/slashStuff/"*
 "$HOME/Scripts/backupPackages/backupAptPackages.sh"
 
 # --- dotfiles and generated lists ----------------------------------------------------
-ionice -c 3 rsync -a "$HOME"/{.config,.local,aptlist.txt,installedpackages.txt,cron,.bashrc} "$STORE/"
+ionice -c 3 rsync -a "$HOME"/{.config,.local,installedpackages.txt,cron,.bashrc} "$STORE/"
 drop_cache
 
 # --- per-service config --------------------------------------------------------------
