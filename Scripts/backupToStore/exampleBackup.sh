@@ -13,7 +13,6 @@ shopt -s extglob
 
 HOST="$(hostname)"
 STORE="$HOME/Store/2025_backup/<category>/$HOST"     # e.g. main-servers / baby-servers
-ARCHETYPE="$HOME/Store/archetypes/$HOST"
 
 # Page cache fills up fast when copying many GB; drop it between big steps so a small
 # VM does not OOM mid-backup.
@@ -26,11 +25,7 @@ safe_copy() { sudo ionice -c 3 rsync -a "$1" "$2"; }
 rm -rf "$STORE/slashStuff/"*
 safe_copy /etc/ "$STORE/slashStuff/etc/"
 
-# /sbin is distro binaries that apt reinstalls byte-identically, and they do NOT delta in
-# git - one 41MB binary committed 7 times is ~280MB of permanent history for something
-# `apt install` reproduces exactly. Keep the small local scripts, drop the compiled weight,
-# and leave a manifest recording what was there.
-sudo ionice -c 3 rsync -a --max-size=1M /sbin/ "$STORE/slashStuff/sbin/"
+# /sbin isn't copied: the package list reinstalls it, and the manifest records what was there
 ls -lA /sbin > "$STORE/slashStuff/sbin.manifest.txt"
 drop_cache
 
@@ -66,14 +61,8 @@ drop_cache
 
 sudo chown -R "$(id -un)" "$STORE/docker/" 2>/dev/null || true
 
-# Strip bulky re-downloadable junk before mirroring into the archetype copy.
+# Strip bulky re-downloadable junk (see _pruneBackupJunk.sh for the list)
 "$HOME/Scripts/backupToStore/_pruneBackupJunk.sh" "$STORE"
 
-# --- archetype mirror ----------------------------------------------------------------
-# archetypes/ is the "what a fresh host of this type looks like" copy: dotfiles and
-# generated lists, without the host-specific system and service data.
-ionice -c 3 rsync -a "$STORE"/.[!.]* "$ARCHETYPE/"
-ionice -c 3 rsync -a --exclude='slashStuff' --exclude='docker' "$STORE/" "$ARCHETYPE/"
-
-# reset ownership so the next run can overwrite: sudo rsync + the archetypes mirror leave root-owned files
+# reset ownership so the next run can overwrite: sudo rsync leaves root-owned files
 sudo chown -R "$USER" ~/Store
