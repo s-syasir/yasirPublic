@@ -2,4 +2,4 @@
 echo Waking up Bigboi
 sudo etherwake -i vmbr0 <MAC>
 sleep 60
-echo Nasir should be awake
+echo Bigboi should be awake
