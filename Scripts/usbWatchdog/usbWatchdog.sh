@@ -29,7 +29,8 @@ STATE="${XDG_RUNTIME_DIR:-/tmp}/usbWatchdog"
 COOLDOWN=300
 
 # everything that preceded the lockup, plus the lockup itself
-PATTERNS='error -(32|71|110)|not accepting address|not responding to setup address|disabled by hub|over-current|Cannot enable|mismatched command completion|unknown event type|invalid context state|blocked for more than'
+# "Cannot enable" is anchored: bare, it also matches kvm_amd's x2AVIC firmware-bug line
+PATTERNS='error -(32|71|110)|not accepting address|not responding to setup address|disabled by hub|over-current|Cannot enable\. Maybe|mismatched command completion|unknown event type|invalid context state|blocked for more than'
 
 # notify-send needs the session bus, which a user service does not always inherit
 [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ] ||
