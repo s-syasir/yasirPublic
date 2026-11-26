@@ -1,0 +1,7 @@
+[Unit]
+Description=Export SMART self-test results for node_exporter (smart_selftest.prom)
+After=smartd.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/bin/smart_selftest_prom.py

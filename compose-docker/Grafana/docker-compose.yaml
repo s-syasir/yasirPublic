@@ -17,6 +17,8 @@ services:
       - GF_PLUGINS_PREINSTALL_DISABLED=true
       - GF_SERVER_ROOT_URL=https://grafana.<HOST>.example.org
       - GF_DATABASE_WAL=true
+      # One "Plugin Request Completed" line per alert query (~270k/day) was most of Grafana's log.
+      - GF_LOG_FILTERS=plugin.prometheus:warn plugin.loki:warn
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
